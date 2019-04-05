@@ -83,9 +83,28 @@ const typeDefs = `
   }
 
   type Mutation {
-    createUser(name: String!, email: String!, age: Int): User!
-    createPost(title: String!, body: String!, published: Boolean!, author: ID!): Post!
-    createComment(text: String!, author: ID!, post: ID!): Comment!
+    createUser(data: CreateUserInput): User!
+    createPost(data: CreatePostInput): Post!
+    createComment(data: CreateCommentInput): Comment!
+  }
+
+  input CreateUserInput {
+    name: String!
+    email: String!
+    age: Int
+  }
+
+  input CreatePostInput {
+    title: String!
+    body: String!
+    published: Boolean!
+    author: ID!
+  }
+
+  input CreateCommentInput {
+    text: String!
+    author: ID!
+    post: ID!
   }
 
   type Post { 
@@ -136,7 +155,7 @@ const resolvers = {
   },
   Mutation: {
     createUser(parent, args, ctx, info) {
-      const { email, name, age } = args;
+      const { email, name, age } = args.data;
 
       const emailTaken = users.some(user => user.email === email);
 
@@ -154,7 +173,7 @@ const resolvers = {
       }
     },
     createPost(parent, args, ctx, info) {
-      const { title, body, published, author } = args;
+      const { title, body, published, author } = args.data;
 
       const userExists = users.some(user => user.id === parseInt(author));
 
@@ -173,7 +192,7 @@ const resolvers = {
       }
     },
     createComment(parent, args, ctx, info) {
-      const { text, author, post } = args;
+      const { text, author, post } = args.data;
 
       const userExists = users.some(user => user.id === parseInt(author));
       const postExists = posts.some(postItem => postItem.id === parseInt(author) && postItem.published);
