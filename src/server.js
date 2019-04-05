@@ -1,7 +1,7 @@
 import { GraphQLServer } from 'graphql-yoga';
 
 // Fake data
-const users = [
+let users = [
   {
     id: 1,
     name: 'Nguyen Quang An',
@@ -22,7 +22,7 @@ const users = [
   }
 ]
 
-const posts = [
+let posts = [
   {
     id: 10,
     title: 'GraphQL 101',
@@ -46,7 +46,7 @@ const posts = [
   }
 ]
 
-const comments = [
+let comments = [
   {
     id: 20,
     text: "Best course",
@@ -86,6 +86,9 @@ const typeDefs = `
     createUser(data: CreateUserInput): User!
     createPost(data: CreatePostInput): Post!
     createComment(data: CreateCommentInput): Comment!
+    deleteUser(id: ID!): User!
+    deletePost(id: ID!): Post!
+    deleteComment(id: ID!): Comment!
   }
 
   input CreateUserInput {
@@ -212,12 +215,58 @@ const resolvers = {
 
       return newComment;
 
+    },
+    deleteUser(parent, args, ctx, info) {
+      const { id } = args;
+
+      const userIndex = users.findIndex(user => user.id === parseInt(id));
+
+      if (userIndex === -1) throw new Error('User is not exists');
+
+      const userDeleted = users.splice(userIndex, 1);
+
+      posts = posts.filter(post => {
+        const match = post.author === parseInt(id);
+        if (match) {
+          comments = comments.filter(comment => comment.post !== post.id);
+        }
+        return !match;
+      });
+
+      comments = comments.filter(comment => comment.author !== parseInt(id));
+
+      return userDeleted[0];
+
+    },
+    deletePost(parent, args, ctx, info) {
+      const { id } = args;
+      const postIndex = posts.findIndex(post => post.id === parseInt(id));
+
+      if (postIndex === -1 ) throw new Error('Post is not exists');
+
+      const postDeleted = posts.splice(postIndex, 1);
+
+      comments = comments.filter(comment => comment.post !== parseInt(id));
+
+      return postDeleted[0];
+
+    },
+    deleteComment(parent, args, ctx, info) {
+      const { id } = args;
+      const commentIndex = comments.findIndex(comment => comment.id === parseInt(id));
+
+      if (commentIndex === -1 ) throw new Error('Comment is not exists');
+
+      const commentDeleted = comments.splice(commentIndex, 1);
+
+      return commentDeleted[0];
+
     }
   },
   Post: { // Custom rieng cho Post type moi khi duoc goi
     author(parent, args, ctx, info) {
       // parent la gia tri cua object post
-      return users.find(user => user.id === parent.author);
+      return users.find(user => user.id === parseInt(parent.author));
     },
     comments(parent, args, ctx, info) {
       return comments.filter(comment => comment.post === parent.id)
