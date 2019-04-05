@@ -82,7 +82,13 @@ const typeDefs = `
     comments: [Comment!]!
   }
 
-  type Post {
+  type Mutation {
+    createUser(name: String!, email: String!, age: Int): User!
+    createPost(title: String!, body: String!, published: Boolean!, author: ID!): Post!
+    createComment(text: String!, author: ID!, post: ID!): Comment!
+  }
+
+  type Post { 
     id: ID!
     title: String!
     body: String!
@@ -95,7 +101,7 @@ const typeDefs = `
     id: ID!
     name: String!
     email: String!
-    age: Int!
+    age: Int
     posts: [Post!]!
     comments: [Comment!]!
   }
@@ -126,6 +132,67 @@ const resolvers = {
     },
     comments() {
       return comments;
+    }
+  },
+  Mutation: {
+    createUser(parent, args, ctx, info) {
+      const { email, name, age } = args;
+
+      const emailTaken = users.some(user => user.email === email);
+
+      if (emailTaken) throw new Error('Email taken.')
+
+      const newUser = {
+        id: new Date().getTime(),
+        email,
+        name,
+        age,
+      }
+      users.push(newUser);
+      return {
+        ...newUser,
+      }
+    },
+    createPost(parent, args, ctx, info) {
+      const { title, body, published, author } = args;
+
+      const userExists = users.some(user => user.id === parseInt(author));
+
+      if (!userExists) throw new Error('User is not exists.')
+
+      const newPost = {
+        id: new Date().getTime(),
+        title,
+        body,
+        published,
+        author
+      }
+      posts.push(newPost);
+      return {
+        ...newPost,
+      }
+    },
+    createComment(parent, args, ctx, info) {
+      const { text, author, post } = args;
+
+      const userExists = users.some(user => user.id === parseInt(author));
+      const postExists = posts.some(postItem => postItem.id === parseInt(author) && postItem.published);
+
+      if (!userExists) throw new Error('User is not exist.');
+
+      if (!postExists) throw new Error('Post is not exist.');
+
+      const newComment = {
+        id: new Date().getTime(),
+        text,
+        author,
+        post
+      }
+
+      comments.push(newComment);
+
+      return newComment;
+
     }
   },
   Post: { // Custom rieng cho Post type moi khi duoc goi
