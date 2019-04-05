@@ -46,6 +46,32 @@ const posts = [
   }
 ]
 
+const comments = [
+  {
+    id: 20,
+    text: "Best course",
+    author: 1,
+    post: 10,
+  },
+  {
+    id: 21,
+    text: "Best course1",
+    author: 2,
+    post: 11,
+  },
+  {
+    id: 22,
+    text: "Best course2",
+    author:1,
+    post: 12,
+  },
+  {
+    id: 23,
+    text: "Best course3",
+    author: 3,
+    post: 10,
+  }
+]
 // Types
 
 const typeDefs = `
@@ -53,6 +79,7 @@ const typeDefs = `
     users: [User!]!
     me: User!
     posts(query: String): [Post!]!
+    comments: [Comment!]!
   }
 
   type Post {
@@ -61,6 +88,7 @@ const typeDefs = `
     body: String!
     published: Boolean!
     author: User!
+    comments: [Comment!]!
   }
 
   type User {
@@ -68,7 +96,15 @@ const typeDefs = `
     name: String!
     email: String!
     age: Int!
-    posts: [Post]!
+    posts: [Post!]!
+    comments: [Comment!]!
+  }
+
+  type Comment {
+    id: ID!
+    text: String!
+    author: User!
+    post: Post!
   }
 
 `
@@ -87,18 +123,36 @@ const resolvers = {
     },
     posts() {
       return posts;
+    },
+    comments() {
+      return comments;
     }
   },
   Post: { // Custom rieng cho Post type moi khi duoc goi
     author(parent, args, ctx, info) {
-      console.log(ctx);
       // parent la gia tri cua object post
       return users.find(user => user.id === parent.author);
-    }
+    },
+    comments(parent, args, ctx, info) {
+      return comments.filter(comment => comment.post === parent.id)
+    },
   },
   User: {
     posts(parent, args, ctx, info) {
       return posts.filter(post => post.author === parent.id)
+    },
+    comments(parent, args, ctx, info) {
+      return comments.filter(comment => comment.author === parent.id)
+    },
+    
+  },
+  Comment: {
+    author(parent, args, ctx, info) {
+      // parent la gia tri cua object post
+      return users.find(user => user.id === parent.author);
+    },
+    post(parent, args, ctx, info) {
+      return posts.find(post => post.id === parent.post)
     }
   }
 }
