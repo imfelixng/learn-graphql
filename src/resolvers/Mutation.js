@@ -103,6 +103,33 @@ const Mutation = {
 
     return commentDeleted[0];
 
+  },
+  updateUser(parent, args, ctx, info) {
+    const { id, data } = args;
+    const { name, email, age } = data;
+    
+    const user = ctx.db.users.find(user => user.id === parseInt(id));
+
+    if (!user) throw new Error('User is not exists');
+
+    if (typeof email === 'string') {
+      const emailTaken = ctx.db.users.find(user => user.email === email);
+      if (emailTaken) throw new Error('Email taken');
+
+      user.email = email;
+
+    }
+
+    if (typeof name === 'string') {
+      user.name = name;
+    }
+
+    if (typeof name !== 'undefined') {
+      user.age = age;
+    }
+
+    return user;
+
   }
 };
 
