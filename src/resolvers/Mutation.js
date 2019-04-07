@@ -168,6 +168,10 @@ const Mutation = {
 
     return comment;
 
+  },
+  setCount(parent, { count }, { pubsub }, info) {
+    pubsub.publish('count', { count })
+    return count;
   }
 };
 
