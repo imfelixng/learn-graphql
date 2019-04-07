@@ -20,7 +20,7 @@ const Mutation = {
   createPost(parent, args, ctx, info) {
     const { title, body, published, author } = args.data;
 
-    const userExists = ctx.db.users.some(user => user.id === parseInt(author));
+    const userExists = ctx.db.users.some(user => user.id === author);
 
     if (!userExists) throw new Error('User is not exists.')
 
@@ -39,8 +39,10 @@ const Mutation = {
   createComment(parent, args, ctx, info) {
     const { text, author, post } = args.data;
 
-    const userExists = ctx.db.users.some(user => user.id === parseInt(author));
-    const postExists = ctx.db.posts.some(postItem => postItem.id === parseInt(author) && postItem.published);
+    const userExists = ctx.db.users.some(user => user.id === author);
+    const postExists = ctx.db.posts.some(postItem => {
+      return (postItem.id === post) && postItem.published;
+    });
 
     if (!userExists) throw new Error('User is not exist.');
 
@@ -55,47 +57,49 @@ const Mutation = {
 
     ctx.db.comments.push(newComment);
 
+    ctx.pubsub.publish(`comment ${post}`, { comment: newComment })
+
     return newComment;
 
   },
   deleteUser(parent, args, ctx, info) {
     const { id } = args;
 
-    const userIndex = ctx.db.users.findIndex(user => user.id === parseInt(id));
+    const userIndex = ctx.db.users.findIndex(user => user.id === idt);
 
     if (userIndex === -1) throw new Error('User is not exists');
 
     const userDeleted = ctx.db.users.splice(userIndex, 1);
 
     ctx.db.posts = ctx.db.posts.filter(post => {
-      const match = post.author === parseInt(id);
+      const match = post.author === idt;
       if (match) {
         ctx.db.comments = ctx.db.comments.filter(comment => comment.post !== post.id);
       }
       return !match;
     });
 
-    ctx.db.comments = ctx.db.comments.filter(comment => comment.author !== parseInt(id));
+    ctx.db.comments = ctx.db.comments.filter(comment => comment.author !== idt);
 
     return userDeleted[0];
 
   },
   deletePost(parent, args, ctx, info) {
     const { id } = args;
-    const postIndex = ctx.db.posts.findIndex(post => post.id === parseInt(id));
+    const postIndex = ctx.db.posts.findIndex(post => post.id === idt);
 
     if (postIndex === -1 ) throw new Error('Post is not exists');
 
     const postDeleted = ctx.db.posts.splice(postIndex, 1);
 
-    ctx.db.comments = ctx.db.comments.filter(comment => comment.post !== parseInt(id));
+    ctx.db.comments = ctx.db.comments.filter(comment => comment.post !== idt);
 
     return postDeleted[0];
 
   },
   deleteComment(parent, args, ctx, info) {
     const { id } = args;
-    const commentIndex = ctx.db.comments.findIndex(comment => comment.id === parseInt(id));
+    const commentIndex = ctx.db.comments.findIndex(comment => comment.id === idt);
 
     if (commentIndex === -1 ) throw new Error('Comment is not exists');
 
@@ -108,7 +112,7 @@ const Mutation = {
     const { id, data } = args;
     const { name, email, age } = data;
     
-    const user = ctx.db.users.find(user => user.id === parseInt(id));
+    const user = ctx.db.users.find(user => user.id === idt);
 
     if (!user) throw new Error('User is not exists');
 
@@ -135,7 +139,7 @@ const Mutation = {
     const { id, data } = args;
     const { title, body, published } = data;
 
-    const post = ctx.db.posts.find(post => post.id === parseInt(id));
+    const post = ctx.db.posts.find(post => post.id === idt);
 
     if (!post) throw new Error('Post is not exists');
 
@@ -158,7 +162,7 @@ const Mutation = {
     const { id, data } = args;
     const { text } = data;
 
-    const comment = ctx.db.comments.find(comment => comment.id === parseInt(id));
+    const comment = ctx.db.comments.find(comment => comment.id === id);
 
     if (!comment) throw new Error('comment is not exists');
 
