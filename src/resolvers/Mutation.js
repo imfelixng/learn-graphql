@@ -130,6 +130,44 @@ const Mutation = {
 
     return user;
 
+  },
+  updatePost(parent, args, ctx, info) {
+    const { id, data } = args;
+    const { title, body, published } = data;
+
+    const post = ctx.db.posts.find(post => post.id === parseInt(id));
+
+    if (!post) throw new Error('Post is not exists');
+
+    if (typeof title === 'string') {
+      post.title = title;
+    }
+
+    if (typeof body === 'string') {
+      post.body = body;
+    }
+
+    if (typeof published === 'boolean') {
+      post.published = published;
+    }
+
+    return post;
+
+  },
+  updateComment(parent, args, ctx, info) {
+    const { id, data } = args;
+    const { text } = data;
+
+    const comment = ctx.db.comments.find(comment => comment.id === parseInt(id));
+
+    if (!comment) throw new Error('comment is not exists');
+
+    if (typeof text === 'string') {
+      comment.text = text;
+    }
+
+    return comment;
+
   }
 };
 
