@@ -13,6 +13,11 @@ const Subscription = {
       if (!post) throw new Error('Post not found');
       return ctx.pubsub.asyncIterator(`comment ${postID}`);
     }
+  },
+  post: {
+    subscribe(parent, args, ctx, info) {
+      return ctx.pubsub.asyncIterator(`post`);
+    }
   }
 }
 
