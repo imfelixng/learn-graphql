@@ -1,9 +1,4 @@
 const Subscription = {
-  count: {
-    subscribe(parent, args, ctx, info){
-      return ctx.pubsub.asyncIterator('count');
-    }
-  },
   comment: {
     subscribe(parent, args, ctx, info) {
 
