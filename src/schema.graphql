@@ -18,8 +18,7 @@ type Mutation {
 }
 
 type Subscription {
-  count: Int!
-  comment(postID: ID!): Comment!
+  comment(postID: ID!): CommentSubscriptionPayload!
   post: PostSubscriptionPayload!
 }
 
@@ -88,4 +87,9 @@ type Comment {
 type PostSubscriptionPayload {
   mutation: String!
   data: Post!
+}
+
+type CommentSubscriptionPayload {
+  mutation: String!
+  data: Comment!
 }

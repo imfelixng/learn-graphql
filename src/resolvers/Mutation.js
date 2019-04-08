@@ -67,7 +67,12 @@ const Mutation = {
 
     ctx.db.comments.push(newComment);
 
-    ctx.pubsub.publish(`comment ${post}`, { comment: newComment })
+    ctx.pubsub.publish(`comment ${post}`, { 
+      comment: {
+        mutation: 'CREATED',
+        data: newComment
+      }
+     })
 
     return newComment;
 
@@ -122,9 +127,16 @@ const Mutation = {
 
     if (commentIndex === -1 ) throw new Error('Comment is not exists');
 
-    const commentDeleted = ctx.db.comments.splice(commentIndex, 1);
+    const [comment] = ctx.db.comments.splice(commentIndex, 1);
 
-    return commentDeleted[0];
+    ctx.pubsub.publish(`comment ${post}`, { 
+      comment: {
+        mutation: 'DELETED',
+        data: comment
+      }
+     })
+
+    return comment;
 
   },
   updateUser(parent, args, ctx, info) {
@@ -160,6 +172,8 @@ const Mutation = {
 
     const post = ctx.db.posts.find(post => post.id === id);
 
+    const originalPost = { ...post }
+
     if (!post) throw new Error('Post is not exists');
 
     if (typeof title === 'string') {
@@ -172,6 +186,32 @@ const Mutation = {
 
     if (typeof published === 'boolean') {
       post.published = published;
+
+      if(originalPost.published && !post.published) {
+        // deleted = true => false
+        ctx.pubsub.publish('post', {
+          post: {
+            mutation: 'DELETED',
+            data: originalPost
+          }
+        })
+      } else if (!originalPost.published && post.published){
+        // created = false => true
+        ctx.pubsub.publish('post', {
+          post: {
+            mutation: 'CREATED',
+            data: post
+          }
+        })
+      }
+    } else if (post.published) {
+      //updated = true => true
+      ctx.pubsub.publish('post', {
+        post: {
+          mutation: 'UPDATED',
+          data: post
+        }
+      })
     }
 
     return post;
@@ -189,6 +229,13 @@ const Mutation = {
       comment.text = text;
     }
 
+    ctx.pubsub.publish(`comment ${post}`, { 
+      comment: {
+        mutation: 'UPDATED',
+        data: comment
+      }
+     })
+    
     return comment;
 
   }
