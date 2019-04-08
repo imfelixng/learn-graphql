@@ -84,12 +84,18 @@ type Comment {
   post: Post!
 }
 
+enum MutationType { # khai bao cac truong se co, group lai trong object
+  CREATED
+  DELETED
+  UPDATED
+}
+
 type PostSubscriptionPayload {
-  mutation: String!
+  mutation: MutationType!
   data: Post!
 }
 
 type CommentSubscriptionPayload {
-  mutation: String!
+  mutation: MutationType!
   data: Comment!
 }
