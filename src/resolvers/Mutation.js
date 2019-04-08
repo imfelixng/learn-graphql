@@ -34,7 +34,12 @@ const Mutation = {
     ctx.db.posts.push(newPost);
 
     if (newPost.published) {
-      ctx.pubsub.publish('post', { post: newPost });
+      ctx.pubsub.publish('post', { 
+        post: {
+          mutation: 'CREATED',
+          data: newPost
+        }
+       });
     }
 
     return {
@@ -95,11 +100,20 @@ const Mutation = {
 
     if (postIndex === -1 ) throw new Error('Post is not exists');
 
-    const postDeleted = ctx.db.posts.splice(postIndex, 1);
+    const [post] = ctx.db.posts.splice(postIndex, 1);
 
     ctx.db.comments = ctx.db.comments.filter(comment => comment.post !== id);
 
-    return postDeleted[0];
+    if (post.published) {
+      ctx.pubsub.publish('post', {
+        post: {
+          mutation: 'DELETED',
+          data: post
+        }
+      })
+    }
+
+    return post;
 
   },
   deleteComment(parent, args, ctx, info) {

@@ -31,14 +31,14 @@ const posts = [
     id: '11',
     title: 'GraphQL 102',
     body: 'This is first tutorials for graphQL',
-    published: false,
+    published: true,
     author: '2'
   },
   {
     id: '12',
     title: 'GraphQL 103',
     body: 'This is first tutorials for graphQL',
-    published: false,
+    published: true,
     author: '1'
   }
 ]
